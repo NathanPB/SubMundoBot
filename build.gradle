@@ -1,0 +1,16 @@
+plugins {
+    id 'java'
+    id "com.github.johnrengelman.shadow" version "6.0.0"
+}
+
+group 'piva.sbb'
+version '1.0'
+
+repositories {
+    mavenCentral()
+    jcenter();
+}
+
+dependencies {
+    implementation 'net.dv8tion:JDA:4.2.0_204'
+}

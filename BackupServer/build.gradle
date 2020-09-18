@@ -1,0 +1,16 @@
+plugins {
+    id 'java'
+    id "com.github.johnrengelman.shadow"
+}
+
+group 'piva.sbb.backup'
+version '1.0'
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    implementation 'net.dv8tion:JDA:4.2.0_204'
+}
