@@ -13,4 +13,5 @@ repositories {
 
 dependencies {
     implementation 'net.dv8tion:JDA:4.2.0_204'
+    compile files("$rootDir/libs/PyvaUtils-1.0.jar")
 }

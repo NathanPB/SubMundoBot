@@ -13,4 +13,8 @@ repositories {
 
 dependencies {
     implementation 'net.dv8tion:JDA:4.2.0_204'
+    compile files('libs/PyvaUtils-1.0.jar')
+
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
+    compile 'com.zaxxer:HikariCP:3.4.5'
 }
