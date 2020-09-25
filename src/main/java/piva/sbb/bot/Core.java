@@ -23,7 +23,7 @@ public class Core {
         logger.info("Building bot...");
 
         try {
-            jda = JDABuilder.createDefault("NzQ2MDg2ODg1NTc0NzA1MjA0.Xz7Njw.8sAV3PSOLr5QzAB0RzUjH08HY84")
+            jda = JDABuilder.createDefault("NzQ2MTE4MzA4NDMyMTgzMzI4.Xz7q0g.eRzrLxW5TDZZuw3He_gcVqXkL9M")
                     .setAutoReconnect(true)
                     .addEventListeners(new CommandHandler())
                     .build();
