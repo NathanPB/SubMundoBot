@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id "com.github.johnrengelman.shadow"
 }
 
 group 'piva.sbb.backup'
@@ -12,6 +11,6 @@ repositories {
 }
 
 dependencies {
-    implementation 'net.dv8tion:JDA:4.2.0_204'
-    compile files("$rootDir/libs/PyvaUtils-1.0.jar")
+    compileOnly 'net.dv8tion:JDA:4.2.0_204'
+    compileOnly files("$rootDir/libs/PyvaUtils-1.0.jar")
 }

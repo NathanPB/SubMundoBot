@@ -27,4 +27,8 @@ public class BotProperties implements PropertiesFile {
 
     @Property
     public String database;
+
+    @Property
+    @Default.DefaultString(defaultString = "!")
+    public String prefix;
 }

@@ -21,7 +21,7 @@ public class Database {
         config.setMaximumPoolSize(10);
         config.setLeakDetectionThreshold(60000);
 
-        databasePool = new HikariDataSource(databasePool);
+        databasePool = new HikariDataSource(config);
     }
 
     public static HikariDataSource getDatabasePool() {

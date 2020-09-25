@@ -1,8 +1,11 @@
 # Project exclude paths
 /.gradle/
 /.idea/
+/.gitignore/
 /BackupServer/build/
 /BackupServer/build/classes/java/main/
 /build/
 /build/classes/java/main/
 manager.properties
+config.json
+emojis.txt
