@@ -9,11 +9,11 @@ import org.json.JSONArray;
 import piva.sbb.bot.BotConfigs;
 import piva.sbb.bot.Core;
 import piva.sbb.bot.commands.control.*;
+import piva.sbb.bot.interfaces.EmojiReact;
 import piva.sbb.bot.utils.Emoji;
 import piva.sbb.bot.interfaces.Interface;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Command(name = "config", async = true)
@@ -38,10 +38,12 @@ public class ConfigCommand implements CommandExecutable {
 
         @Override
         protected MessageEmbed build(EmbedBuilder embedBuilder) {
+            embedBuilder.setTitle("Configurações");
             embedBuilder.setDescription("Selecione o que deseja configurar");
 
             embedBuilder.addField(":asterisk: Prefixo", "", true);
             embedBuilder.addField(":octagonal_sign: Canais proibidos", "", true);
+            embedBuilder.addField(":scales: Permissões", "", true);
             embedBuilder.addField(":white_check_mark: Terminar", "", true);
 
             return embedBuilder.build();
@@ -49,14 +51,14 @@ public class ConfigCommand implements CommandExecutable {
 
         @Override
         protected Emoji[] reactEmojis() {
-            return new Emoji[]{Emoji.ASTERISK, Emoji.OCTAGONAL_SIGN, Emoji.WHITE_CHECK_MARK};
+            return new Emoji[]{Emoji.ASTERISK, Emoji.OCTAGONAL_SIGN, Emoji.SCALES, Emoji.WHITE_CHECK_MARK};
         }
 
         @Override
-        protected void reactEvent(String unicode) {
-            if (unicode.equals(Emoji.ASTERISK.unicode)) {
+        protected void reactEvent(EmojiReact emojiReact) {
+            if (emojiReact.unicode.equals(Emoji.ASTERISK.id)) {
                 this.delete();
-                ChatInput.Input input = ChatInput.ask(member, channel, "Digite o novo prefixo do Bot no bate-papo.");
+                ChatInput.Input input = ChatInput.ask(member, channel, "Digite o novo prefixo do Bot no bate-papo.\nPrefixo atual: ``" + CommandHandler.prefix + "``");
 
                 if (reactToAsk(input))
                     return;
@@ -68,10 +70,77 @@ public class ConfigCommand implements CommandExecutable {
                 channel.sendMessage(":white_check_mark: Prefixo do Bot definido para ``" + input.response.getContentDisplay() + "``").queue();
 
                 this.setup();
-            } else if (unicode.equals(Emoji.OCTAGONAL_SIGN.unicode)) {
+            } else if (emojiReact.unicode.equals(Emoji.SCALES.id))
+                new ConfigPermissionsInterface(member, channel, time).setup();
+            else if (emojiReact.unicode.equals(Emoji.OCTAGONAL_SIGN.id))
                 new ConfigChannelsInterface(member, channel, time).setup();
-            } else if (unicode.equals(Emoji.WHITE_CHECK_MARK.unicode))
+            else if (emojiReact.unicode.equals(Emoji.WHITE_CHECK_MARK.id))
                 this.finish();
+        }
+    }
+
+    static class ConfigPermissionsInterface extends Interface {
+        public ConfigPermissionsInterface(Member member, TextChannel channel, LocalDateTime time) {
+            super(member, channel, time, true);
+        }
+
+        @Override
+        protected MessageEmbed build(EmbedBuilder eb) {
+            eb.setTitle("Permissões");
+            eb.setDescription("Selecione a permissões que deseja configurar o cargo\n" +
+                    "As permissões atuais são: \n" +
+                    "Moderador: " + (Core.getJDA().getRoleById(CommandHandler.modRole) == null ? "Não definido" : Core.getJDA().getRoleById(CommandHandler.modRole).getAsMention()) + "\n" +
+                    "Administrador: " + (Core.getJDA().getRoleById(CommandHandler.adminRole) == null ? "Não definido" : Core.getJDA().getRoleById(CommandHandler.adminRole).getAsMention()) + "\n");
+
+            eb.addField("<:mod:759526449370628117> Moderador", "", true);
+            eb.addField("<:admin:759113291292606465> Administrador", "", true);
+            eb.addBlankField(false);
+            eb.addField(":arrow_left: Voltar", "", true);
+            eb.addField(":white_check_mark: Terminar", "", true);
+
+            return eb.build();
+        }
+
+        @Override
+        protected Emoji[] reactEmojis() {
+            return new Emoji[]{Emoji.MOD, Emoji.ADMIN, Emoji.ARROW_LEFT, Emoji.WHITE_CHECK_MARK};
+        }
+
+        @Override
+        protected void reactEvent(EmojiReact emojiReact) {
+            if (emojiReact.emoteId.equals("759526449370628117") || emojiReact.emoteId.equals("759113291292606465")) {
+                boolean mod = emojiReact.emoteId.equals("759526449370628117");
+
+                ChatInput.Input input = ChatInput.ask(member, channel, "Digite o ID do cargo para conceder as permissões de " + (mod ? "Moderador" : "Administrador"));
+
+                if (reactToAsk(input))
+                    return;
+
+                long id;
+                try {
+                    id = Long.parseLong(input.response.getContentDisplay().split(" ")[0]);
+                } catch (NumberFormatException e) {
+                    channel.sendMessage(":x: Você precisa digitar um número válido").queue();
+                    return;
+                }
+
+                if (mod) {
+                    CommandHandler.modRole = id;
+                    BotConfigs.json.getJSONObject("permissions").put("mod", id);
+                } else {
+                    CommandHandler.adminRole = id;
+                    BotConfigs.json.getJSONObject("permissions").put("admin", id);
+                }
+
+                BotConfigs.save();
+
+                channel.sendMessage(":white_check_mark: Permissões para " + (mod ? "moderador" : "administrador") + " definidas.").queue();
+                this.setup();
+            } else if (emojiReact.unicode.equals(Emoji.ARROW_LEFT.id)) {
+                new ConfigInterface(member, channel, time).setup();
+            } else if (emojiReact.unicode.equals(Emoji.WHITE_CHECK_MARK.id)) {
+                this.finish();
+            }
         }
     }
 
@@ -82,6 +151,7 @@ public class ConfigCommand implements CommandExecutable {
 
         @Override
         protected MessageEmbed build(EmbedBuilder eb) {
+            eb.setTitle("Canais proibidos");
             String description = "Configure os canais proibidos para comandos do Bot.\n";
 
             if (CommandHandler.prohibitedChannels.size() == 0)
@@ -89,7 +159,7 @@ public class ConfigCommand implements CommandExecutable {
             else {
                 StringBuilder sb = new StringBuilder();
                 sb.append("Canais atualmente proibidos: ");
-                Core.getJda().getTextChannels().stream()
+                Core.getJDA().getTextChannels().stream()
                         .filter(textChannel -> CommandHandler.prohibitedChannels.stream().anyMatch(textChannel1 -> textChannel.getIdLong() == textChannel1))
                         .collect(Collectors.toList())
                         .forEach(textChannel -> sb.append(textChannel.getAsMention()).append(", "));
@@ -114,8 +184,8 @@ public class ConfigCommand implements CommandExecutable {
         }
 
         @Override
-        protected void reactEvent(String unicode) {
-            if (unicode.equals(Emoji.HEAVY_PLUS_SIGN.unicode)) {
+        protected void reactEvent(EmojiReact emojiReact) {
+            if (emojiReact.unicode.equals(Emoji.HEAVY_PLUS_SIGN.id)) {
                 this.delete();
 
                 ChatInput.Input input = ChatInput.ask(member, channel, "Mencione todos os canais que você deseja adicionar aos canais proibidos.");
@@ -128,13 +198,12 @@ public class ConfigCommand implements CommandExecutable {
                         .map(TextChannel::getIdLong)
                         .collect(Collectors.toList()));
 
-                BotConfigs.json.remove("prohibited channels");
                 BotConfigs.json.put("prohibited channels", new JSONArray(CommandHandler.prohibitedChannels));
                 BotConfigs.save();
 
                 channel.sendMessage(":white_check_mark: Canais proibidos.").queue();
                 this.setup();
-            } else if (unicode.equals(Emoji.HEAVY_MINUS_SIGN.unicode)) {
+            } else if (emojiReact.unicode.equals(Emoji.HEAVY_MINUS_SIGN.id)) {
                 this.delete();
 
                 ChatInput.Input input = ChatInput.ask(member, channel, "Mencione todos os canais que você deseja remover dos canais proibidos.");
@@ -144,16 +213,15 @@ public class ConfigCommand implements CommandExecutable {
 
                 CommandHandler.prohibitedChannels.removeAll(input.response.getMentionedChannels().stream().map(TextChannel::getIdLong).collect(Collectors.toList()));
 
-                BotConfigs.json.remove("prohibited channels");
                 BotConfigs.json.put("prohibited channels", new JSONArray(CommandHandler.prohibitedChannels));
                 BotConfigs.save();
 
                 channel.sendMessage(":white_check_mark: Canais removidos.").queue();
                 this.setup();
             }
-            else if (unicode.equals(Emoji.ARROW_LEFT.unicode)) {
+            else if (emojiReact.unicode.equals(Emoji.ARROW_LEFT.id)) {
                 new ConfigInterface(member, channel, time).setup();
-            } else if (unicode.equals(Emoji.WHITE_CHECK_MARK.unicode)) {
+            } else if (emojiReact.unicode.equals(Emoji.WHITE_CHECK_MARK.id)) {
                 this.finish();
             }
         }

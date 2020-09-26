@@ -17,6 +17,9 @@ public class CommandHandler extends ListenerAdapter {
     public static List<SBBCommand> commands = new ArrayList<>();
     public static List<Long> prohibitedChannels = new ArrayList<>();
 
+    public static long modRole;
+    public static long adminRole;
+
     public static void register(CommandExecutable command) {
         Command commandAnnotation = command.getClass().getAnnotation(Command.class);
 
@@ -36,6 +39,9 @@ public class CommandHandler extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
+        if (event.getGuild().getIdLong() != Core.getGuild().getIdLong())
+            return;
+
         if (event.getMessage().getContentDisplay().toLowerCase().startsWith(prefix)) {
             for (Long prohibitedChannel : prohibitedChannels) {
                 if (event.getChannel().getIdLong() == prohibitedChannel)
@@ -49,6 +55,11 @@ public class CommandHandler extends ListenerAdapter {
 
             searchCommand(split[0])
                     .ifPresent(command -> {
+                        if (!Permission.hasPermission(event.getMember(), command.command.permission())) {
+                            event.getChannel().sendMessage(":no_entry_sign: Você não tem permissões para este comando.").queue();
+                            return;
+                        }
+
                         if (!command.command.async())
                             command.executable.run(event.getMember(), event.getChannel(), event.getMessage(), args, LocalDateTime.now());
                         else

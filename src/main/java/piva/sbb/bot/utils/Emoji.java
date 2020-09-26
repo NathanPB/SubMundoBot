@@ -1,6 +1,9 @@
 package piva.sbb.bot.utils;
 
 public enum Emoji {
+    ADMIN("759113291292606465", true),
+    MOD("759526449370628117", true),
+    SCALES("⚖️"),
     HEAVY_MINUS_SIGN("➖"),
     HEAVY_PLUS_SIGN("➕"),
     ARROW_LEFT("⬅️"),
@@ -9,9 +12,16 @@ public enum Emoji {
     ASTERISK("*️⃣"),
     NO_ENTRY("⛔");
 
-    Emoji(String unicode) {
-        this.unicode = unicode;
+    Emoji(String id) {
+        this.id = id;
+        this.customEmote = false;
     }
 
-    public String unicode;
+    Emoji(String id, boolean customEmote) {
+        this.id = id;
+        this.customEmote = customEmote;
+    }
+
+    public String id;
+    public boolean customEmote;
 }

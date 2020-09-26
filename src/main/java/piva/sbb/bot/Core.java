@@ -3,6 +3,8 @@ package piva.sbb.bot;
 import me.piva.utils.properties.PropertiesLoader;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Guild;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import piva.sbb.bot.commands.ConfigCommand;
@@ -19,6 +21,7 @@ public class Core {
     private static JDA jda;
     private static Logger logger;
     private static BotProperties properties;
+    private static Guild guild;
 
     public static void start() {
         logger = LoggerFactory.getLogger("Bot");
@@ -73,6 +76,9 @@ public class Core {
             if (prohibited_channels instanceof Long)
                 CommandHandler.prohibitedChannels.add((Long) prohibited_channels);
         }
+        JSONObject permissions = BotConfigs.json.getJSONObject("permissions");
+        CommandHandler.modRole = permissions.getLong("mod");
+        CommandHandler.adminRole = permissions.getLong("admin");
 
         logger.info("Loading commands...");
 
@@ -87,9 +93,11 @@ public class Core {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        guild = jda.getGuildById(BotConfigs.json.getLong("guild"));
     }
 
-    public static JDA getJda() {
+    public static JDA getJDA() {
         return jda;
     }
 
@@ -99,5 +107,9 @@ public class Core {
 
     public static BotProperties getProperties() {
         return properties;
+    }
+
+    public static Guild getGuild() {
+        return guild;
     }
 }

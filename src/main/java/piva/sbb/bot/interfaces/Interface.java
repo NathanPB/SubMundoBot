@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import piva.sbb.bot.Core;
 import piva.sbb.bot.commands.control.ChatInput;
 import piva.sbb.bot.utils.Emoji;
 import piva.sbb.bot.utils.Misc;
@@ -14,6 +15,7 @@ import piva.sbb.bot.utils.Misc;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class Interface extends ListenerAdapter {
     public static List<Interface> interfaces = new ArrayList<>();
@@ -35,7 +37,7 @@ public abstract class Interface extends ListenerAdapter {
 
     protected abstract MessageEmbed build(EmbedBuilder eb);
     protected abstract Emoji[] reactEmojis();
-    protected void reactEvent(String unicode) { }
+    protected void reactEvent(EmojiReact emojiReact) { }
 
     public void setup() {
         boolean addNew = true;
@@ -62,8 +64,11 @@ public abstract class Interface extends ListenerAdapter {
 
         try {
             for (Emoji emoji : reactEmojis()) {
-                message.addReaction(emoji.unicode).queue();
-                Thread.sleep(80);
+                if (emoji.customEmote)
+                    message.addReaction(Objects.requireNonNull(Core.getJDA().getEmoteById(emoji.id))).queue();
+                else
+                    message.addReaction(emoji.id).queue();
+                Thread.sleep(50);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();

@@ -1,16 +1,19 @@
 package piva.sbb.bot.commands.control;
 
+import me.piva.utils.task.PyvaTask;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import piva.sbb.bot.Core;
 import piva.sbb.bot.utils.Emoji;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ChatInput extends ListenerAdapter {
     public static List<Input> inputWaiting = new ArrayList<>();
@@ -37,15 +40,17 @@ public class ChatInput extends ListenerAdapter {
     }
 
     public static Input ask(Member member, TextChannel channel, String message) {
-        Message reactMessage = channel.sendMessage(":pen_ballpoint: " + message + "\n\nCancele esta operação reagindo com " + Emoji.NO_ENTRY.unicode + " nesta mensagem").complete();
-        reactMessage.addReaction(Emoji.NO_ENTRY.unicode).queue();
+        Message reactMessage = channel.sendMessage(":pen_ballpoint: " + message + "\n\nCancele esta operação reagindo com " + Emoji.NO_ENTRY.id + " nesta mensagem").complete();
+        reactMessage.addReaction(Emoji.NO_ENTRY.id).queue();
 
         Input input = ask(member.getIdLong(), channel.getIdLong(), reactMessage.getIdLong());
 
-        if (input.timeout)
-            channel.sendMessage(":timer: " + member.getAsMention() + " Tempo esgotado, o comando será cancelado.").queue();
-        if (input.cancelled)
-            channel.sendMessage(":negative_squared_cross_mark: Operação cancelada.").queue();
+        if (input.timeout) {
+            PyvaTask.builder().runnable(task -> channel.sendMessage(":timer: " + member.getAsMention() + " Tempo esgotado, o comando será cancelado.").complete().delete().queueAfter(5, TimeUnit.MINUTES)).buildAndStart();
+        }
+        if (input.cancelled) {
+            PyvaTask.builder().runnable(task -> channel.sendMessage(":negative_squared_cross_mark: Operação cancelada.").complete().delete().queueAfter(1, TimeUnit.MINUTES)).buildAndStart();
+        }
 
         reactMessage.delete().queue();
 
@@ -54,6 +59,9 @@ public class ChatInput extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
+        if (event.getGuild().getIdLong() != Core.getGuild().getIdLong())
+            return;
+
         for (Input input : inputWaiting) {
             if (input.member == event.getMember().getIdLong() && input.textChannel == event.getChannel().getIdLong()) {
                 input.response = event.getMessage();
@@ -68,11 +76,14 @@ public class ChatInput extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {
+        if (event.getGuild().getIdLong() != Core.getGuild().getIdLong())
+            return;
+
         for (Input input : inputWaiting) {
             if (input.reactMessage == event.getMessageIdLong() &&
                     event.getMember().getIdLong() == input.member &&
                     event.getChannel().getIdLong() == input.textChannel &&
-                    event.getReactionEmote().getEmoji().equals(Emoji.NO_ENTRY.unicode)) {
+                    event.getReactionEmote().getEmoji().equals(Emoji.NO_ENTRY.id)) {
                 input.cancelled = true;
                 inputWaiting.remove(input);
                 synchronized (input) {

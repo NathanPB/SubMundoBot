@@ -49,8 +49,12 @@ public class BotConfigs {
     }
 
     private static void loadDefaults() {
+        setDefault(json, "guild", 0L);
         setDefault(json, "prefix", "*");
-        setDefault(json, "permissions", new JSONObject());
+        JSONObject permissions = new JSONObject();
+        setDefault(permissions, "mod", 0L);
+        setDefault(permissions, "admin", 0L);
+        setDefault(json, "permissions", permissions);
         setDefault(json, "prohibited channels", new JSONArray(new ArrayList<>()));
     }
 
