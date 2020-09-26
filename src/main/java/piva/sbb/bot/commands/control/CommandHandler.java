@@ -1,5 +1,6 @@
 package piva.sbb.bot.commands.control;
 
+import me.piva.utils.task.PyvaTask;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import piva.sbb.bot.Core;
@@ -34,10 +35,21 @@ public class CommandHandler extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
-        if (event.getMessage().getContentDisplay().startsWith(prefix)) {
-            String commandName = event.getMessage().getContentDisplay().split(" ")[0].replaceFirst(Pattern.quote(prefix), "");
+        if (event.getMessage().getContentDisplay().toLowerCase().startsWith(prefix)) {
+            String[] split = event.getMessage().getContentDisplay().toLowerCase().replaceFirst(Pattern.quote(prefix), "").trim().split(" ");
+            String[] args = new String[split.length - 1];
 
-            searchCommand(commandName).ifPresent(command -> command.executable.run(event.getMember(), event.getChannel(), event.getMessage(), LocalDateTime.now()));
+            System.arraycopy(split, 1, args, 0, args.length);
+
+            searchCommand(split[0])
+                    .ifPresent(command -> {
+                        if (!command.command.async())
+                            command.executable.run(event.getMember(), event.getChannel(), event.getMessage(), args, LocalDateTime.now());
+                        else
+                            PyvaTask.builder().runnable(task -> {
+                                command.executable.run(event.getMember(), event.getChannel(), event.getMessage(), args, LocalDateTime.now());
+                            }).buildAndStart();
+                    });
         }
     }
 

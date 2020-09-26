@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 )
 public class MilkCommand implements CommandExecutable {
     @Override
-    public void run(Member member, TextChannel textChannel, Message message, LocalDateTime time) {
+    public void run(Member member, TextChannel textChannel, Message message, String[] args, LocalDateTime time) {
         textChannel.sendMessage(member.getAsMention() + " **aqui está seu leite!** :milk:").queue();
     }
 }

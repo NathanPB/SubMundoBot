@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import piva.sbb.bot.commands.HelpCommand;
 import piva.sbb.bot.commands.MilkCommand;
+import piva.sbb.bot.commands.PrefixCommand;
+import piva.sbb.bot.commands.control.ChatInput;
 import piva.sbb.bot.commands.control.CommandHandler;
 
 import javax.security.auth.login.LoginException;
@@ -22,10 +24,13 @@ public class Core {
 
         logger.info("Building bot...");
 
+        //BETA NzQ2MDg2ODg1NTc0NzA1MjA0.Xz7Njw.8sAV3PSOLr5QzAB0RzUjH08HY84
+        //NORMAL NzQ2MTE4MzA4NDMyMTgzMzI4.Xz7q0g.eRzrLxW5TDZZuw3He_gcVqXkL9M
         try {
-            jda = JDABuilder.createDefault("NzQ2MTE4MzA4NDMyMTgzMzI4.Xz7q0g.eRzrLxW5TDZZuw3He_gcVqXkL9M")
+            jda = JDABuilder.createDefault("NzQ2MDg2ODg1NTc0NzA1MjA0.Xz7Njw.8sAV3PSOLr5QzAB0RzUjH08HY84")
                     .setAutoReconnect(true)
                     .addEventListeners(new CommandHandler())
+                    .addEventListeners(new ChatInput())
                     .build();
         } catch (LoginException e) {
             logger.error("An login error occurred while building the JDA");
@@ -67,6 +72,7 @@ public class Core {
 
         CommandHandler.register(new HelpCommand());
         CommandHandler.register(new MilkCommand());
+        CommandHandler.register(new PrefixCommand());
 
         logger.info("Commands loaded");
 

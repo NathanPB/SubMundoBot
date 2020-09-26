@@ -7,4 +7,5 @@ import java.lang.annotation.RetentionPolicy;
 public @interface Command {
     String name();
     String[] aliases() default "";
+    boolean async() default false;
 }

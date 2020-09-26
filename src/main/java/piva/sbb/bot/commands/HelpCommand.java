@@ -25,10 +25,8 @@ import java.time.LocalDateTime;
 )
 public class HelpCommand implements CommandExecutable {
     @Override
-    public void run(Member member, TextChannel textChannel, Message message, LocalDateTime time) {
-        String[] args = message.getContentDisplay().split(" ");
-
-        if (args.length == 1) {
+    public void run(Member member, TextChannel textChannel, Message message, String[] args, LocalDateTime time) {
+        if (args.length == 0) {
             EmbedBuilder eb = Misc.getEmbedBuilder(member.getUser(), time, "Comandos do Bot");
 
             eb.setDescription("Use ``" + CommandHandler.prefix + "ajuda <nome do comando>`` para ver informações de algum comando");
@@ -53,11 +51,11 @@ public class HelpCommand implements CommandExecutable {
 
             textChannel.sendMessage(eb.build()).queue();
             return;
-        } else if (args.length > 1) {
-            CommandHandler.SBBCommand command = CommandHandler.searchCommand(args[1]).orElse(null);
+        } else {
+            CommandHandler.SBBCommand command = CommandHandler.searchCommand(args[0]).orElse(null);
 
             if (command == null) {
-                textChannel.sendMessage(":interrobang: Comando ``" + args[1] + "`` não encontrado.").queue();
+                textChannel.sendMessage(":interrobang: Comando ``" + args[0] + "`` não encontrado.").queue();
                 return;
             }
 
