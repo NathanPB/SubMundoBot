@@ -51,63 +51,63 @@ public class HelpCommand implements CommandExecutable {
 
             textChannel.sendMessage(eb.build()).queue();
             return;
-        } else {
-            CommandHandler.SBBCommand command = CommandHandler.searchCommand(args[0]).orElse(null);
-
-            if (command == null) {
-                textChannel.sendMessage(":interrobang: Comando ``" + args[0] + "`` não encontrado.").queue();
-                return;
-            }
-
-            if (!command.hasHelp() && !command.hasAlias()) {
-                textChannel.sendMessage("Infelizmente o comando ``" + command.command.name() +"`` não possui nenhuma informação adicional. :confused:").queue();
-                return;
-            }
-
-            EmbedBuilder eb = Misc.getEmbedBuilder(member.getUser(), time, "Comando " + command.command.name());
-
-            eb.setDescription("Informações sobre este comando:");
-
-            if (command.hasHelp()) {
-                eb.addField("Categoria:", command.helpDescription.category().getEmoji() + " " + command.helpDescription.category().getName(), false);
-                eb.addField("Descrição:", command.helpDescription.description().isEmpty() ? "Este comando não possui nenhuma descrição" : command.helpDescription.description(), false);
-            }
-            if (command.hasAlias()) {
-                StringBuilder sb = new StringBuilder();
-                for (String alias : command.command.aliases()) {
-                    sb.append("``").append(alias).append("``, ");
-                }
-                sb.deleteCharAt(sb.length() - 1);
-                sb.deleteCharAt(sb.length() - 1);
-                eb.addField("Apelidos/Aliases: ", sb.toString(), false);
-            }
-            if (command.hasUseMode()) {
-                StringBuilder sb = new StringBuilder();
-                boolean commandUseMode = true;
-                for (String s : command.helpDescription.useModes()) {
-                    if (commandUseMode) {
-                        sb
-                                .append("**")
-                                .append(CommandHandler.prefix)
-                                .append(command.command.name())
-                                .append(" ")
-                                .append(s)
-                                .append("**:\n");
-                        commandUseMode = false;
-                        continue;
-                    }
-
-                    sb.append(s).append("\n");
-                    commandUseMode = true;
-                }
-
-                if (!commandUseMode)
-                    sb.append("Nenhum modo de uso informado para este caso.");
-
-                eb.addField("Modo(s) de uso: ", sb.toString(), false);
-            }
-
-            textChannel.sendMessage(eb.build()).queue();
         }
+
+        CommandHandler.SBBCommand command = CommandHandler.searchCommand(args[0]).orElse(null);
+
+        if (command == null) {
+            textChannel.sendMessage(":interrobang: Comando ``" + args[0] + "`` não encontrado.").queue();
+            return;
+        }
+
+        if (!command.hasHelp() && !command.hasAlias()) {
+            textChannel.sendMessage("Infelizmente o comando ``" + command.command.name() +"`` não possui nenhuma informação adicional. :confused:").queue();
+            return;
+        }
+
+        EmbedBuilder eb = Misc.getEmbedBuilder(member.getUser(), time, "Comando " + command.command.name());
+
+        eb.setDescription("Informações sobre este comando:");
+
+        if (command.hasHelp()) {
+            eb.addField("Categoria:", command.helpDescription.category().getEmoji() + " " + command.helpDescription.category().getName(), false);
+            eb.addField("Descrição:", command.helpDescription.description().isEmpty() ? "Este comando não possui nenhuma descrição" : command.helpDescription.description(), false);
+        }
+        if (command.hasAlias()) {
+            StringBuilder sb = new StringBuilder();
+            for (String alias : command.command.aliases()) {
+                sb.append("``").append(alias).append("``, ");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            sb.deleteCharAt(sb.length() - 1);
+            eb.addField("Apelidos/Aliases: ", sb.toString(), false);
+        }
+        if (command.hasUseMode()) {
+            StringBuilder sb = new StringBuilder();
+            boolean commandUseMode = true;
+            for (String s : command.helpDescription.useModes()) {
+                if (commandUseMode) {
+                    sb
+                            .append("**")
+                            .append(CommandHandler.prefix)
+                            .append(command.command.name())
+                            .append(" ")
+                            .append(s)
+                            .append("**:\n");
+                    commandUseMode = false;
+                    continue;
+                }
+
+                sb.append(s).append("\n");
+                commandUseMode = true;
+            }
+
+            if (!commandUseMode)
+                sb.append("Nenhum modo de uso informado para este caso.");
+
+            eb.addField("Modo(s) de uso: ", sb.toString(), false);
+        }
+
+        textChannel.sendMessage(eb.build()).queue();
     }
 }
