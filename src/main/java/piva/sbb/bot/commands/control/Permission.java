@@ -26,8 +26,21 @@ public enum Permission {
         if (permission == NONE)
             return true;
 
-        Permission memberPermisison = getPermission(member);
+        Permission memberPermissison = getPermission(member);
 
-        return memberPermisison != MOD || permission != ADMIN;
+        if (memberPermissison == NONE)
+            return false;
+
+        return memberPermissison != MOD || permission != ADMIN;
+    }
+
+    public static boolean hasPermission(Permission memberPermission, Permission permission) {
+        if (permission == NONE)
+            return true;
+
+        if (memberPermission == NONE)
+            return false;
+
+        return memberPermission != MOD || permission != ADMIN;
     }
 }

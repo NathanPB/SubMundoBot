@@ -12,15 +12,23 @@ public @interface HelpDescription {
     enum Category {
         UTILS(":wrench:", "Utilitários"),
         FUN(":partying_face:", "Diversão"),
-        ADMIN("<:admin:759113291292606465>", "Administrativos");
+        ADMIN("<:admin:759113291292606465>", "Administrativos", Permission.ADMIN);
 
         Category(String emoji, String name) {
             this.emoji = emoji;
             this.name = name;
+            this.permission = Permission.NONE;
+        }
+
+        Category(String emoji, String name, Permission permission) {
+            this.emoji = emoji;
+            this.name = name;
+            this.permission = permission;
         }
 
         String emoji;
         String name;
+        Permission permission;
 
         public String getEmoji() {
             return emoji;
@@ -28,6 +36,10 @@ public @interface HelpDescription {
 
         public String getName() {
             return name;
+        }
+
+        public Permission getPermission() {
+            return permission;
         }
     }
 }

@@ -4,10 +4,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
-import piva.sbb.bot.commands.control.Command;
-import piva.sbb.bot.commands.control.CommandExecutable;
-import piva.sbb.bot.commands.control.CommandHandler;
-import piva.sbb.bot.commands.control.HelpDescription;
+import piva.sbb.bot.commands.control.*;
 import piva.sbb.bot.utils.Misc;
 
 import java.time.LocalDateTime;
@@ -26,12 +23,17 @@ import java.time.LocalDateTime;
 public class HelpCommand implements CommandExecutable {
     @Override
     public void run(Member member, TextChannel textChannel, Message message, String[] args, LocalDateTime time) {
+        Permission memberPermission = Permission.getPermission(member);
+
         if (args.length == 0) {
             EmbedBuilder eb = Misc.getEmbedBuilder(member.getUser(), time, "Comandos do Bot");
 
             eb.setDescription("Use ``" + CommandHandler.prefix + "ajuda <nome do comando>`` para ver informações de algum comando");
 
             for (HelpDescription.Category value : HelpDescription.Category.values()) {
+                if (!Permission.hasPermission(memberPermission, value.getPermission()))
+                    continue;
+
                 StringBuilder sb = new StringBuilder();
 
                 CommandHandler.commands
@@ -62,6 +64,11 @@ public class HelpCommand implements CommandExecutable {
 
         if (!command.hasHelp() && !command.hasAlias()) {
             textChannel.sendMessage("Infelizmente o comando ``" + command.command.name() +"`` não possui nenhuma informação adicional. :confused:").queue();
+            return;
+        }
+
+        if (!Permission.hasPermission(memberPermission, command.command.permission())) {
+            textChannel.sendMessage(":no_entry_sign: Você não tem permissões para ver as informações deste comando.").queue();
             return;
         }
 

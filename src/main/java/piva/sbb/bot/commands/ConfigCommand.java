@@ -16,7 +16,7 @@ import piva.sbb.bot.interfaces.Interface;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
-@Command(name = "config", async = true)
+@Command(name = "config", permission = Permission.MOD, async = true)
 @HelpDescription(
         category = HelpDescription.Category.ADMIN,
         description = "Configura algumas chaves do Bot",
