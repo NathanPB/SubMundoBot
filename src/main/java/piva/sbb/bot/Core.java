@@ -5,11 +5,12 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import piva.sbb.bot.commands.ConfigCommand;
 import piva.sbb.bot.commands.HelpCommand;
 import piva.sbb.bot.commands.MilkCommand;
-import piva.sbb.bot.commands.PrefixCommand;
 import piva.sbb.bot.commands.control.ChatInput;
 import piva.sbb.bot.commands.control.CommandHandler;
+import piva.sbb.bot.interfaces.InterfaceHandler;
 
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
@@ -31,6 +32,7 @@ public class Core {
                     .setAutoReconnect(true)
                     .addEventListeners(new CommandHandler())
                     .addEventListeners(new ChatInput())
+                    .addEventListeners(new InterfaceHandler())
                     .build();
         } catch (LoginException e) {
             logger.error("An login error occurred while building the JDA");
@@ -72,7 +74,7 @@ public class Core {
 
         CommandHandler.register(new HelpCommand());
         CommandHandler.register(new MilkCommand());
-        CommandHandler.register(new PrefixCommand());
+        CommandHandler.register(new ConfigCommand());
 
         logger.info("Commands loaded");
 

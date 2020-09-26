@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import piva.sbb.bot.utils.Emojis;
+import piva.sbb.bot.utils.Emoji;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class ChatInput extends ListenerAdapter {
 
         synchronized (input) {
             try {
-                input.wait(10000);
+                input.wait(120000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -36,16 +36,18 @@ public class ChatInput extends ListenerAdapter {
         return input;
     }
 
-    public static Input ask(Member member, String message, TextChannel channel) {
-        Message reactMessageId = channel.sendMessage(":pen_ballpoint: Digite " + message + "\n\nCancele esta operação reagindo com " + Emojis.NO_ENTRY.unicode + " nesta mensagem").complete();
-        reactMessageId.addReaction(Emojis.NO_ENTRY.unicode).queue();
+    public static Input ask(Member member, TextChannel channel, String message) {
+        Message reactMessage = channel.sendMessage(":pen_ballpoint: Digite " + message + "\n\nCancele esta operação reagindo com " + Emoji.NO_ENTRY.unicode + " nesta mensagem").complete();
+        reactMessage.addReaction(Emoji.NO_ENTRY.unicode).queue();
 
-        Input input = ask(member.getIdLong(), channel.getIdLong(), reactMessageId.getIdLong());
+        Input input = ask(member.getIdLong(), channel.getIdLong(), reactMessage.getIdLong());
 
         if (input.timeout)
             channel.sendMessage(":timer: " + member.getAsMention() + " Tempo esgotado, o comando será cancelado.").queue();
         if (input.cancelled)
             channel.sendMessage(":negative_squared_cross_mark: Operação cancelada.").queue();
+
+        reactMessage.delete().queue();
 
         return input;
     }
@@ -53,22 +55,24 @@ public class ChatInput extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
         for (Input input : inputWaiting) {
-            if (input.textChannel == event.getChannel().getIdLong())
-                if (input.member == event.getMember().getIdLong()) {
-                    input.response = event.getMessage();
-                    inputWaiting.remove(input);
-                    synchronized (input) {
-                        input.notify();
-                    }
-                    return;
+            if (input.member == event.getMember().getIdLong() && input.textChannel == event.getChannel().getIdLong()) {
+                input.response = event.getMessage();
+                inputWaiting.remove(input);
+                synchronized (input) {
+                    input.notify();
                 }
+                return;
+            }
         }
     }
 
     @Override
     public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {
         for (Input input : inputWaiting) {
-            if (input.reactMessage == event.getMessageIdLong() && event.getMember().getIdLong() == input.member && event.getReactionEmote().getEmoji().equals(Emojis.NO_ENTRY.unicode)) {
+            if (input.reactMessage == event.getMessageIdLong() &&
+                    event.getMember().getIdLong() == input.member &&
+                    event.getChannel().getIdLong() == input.textChannel &&
+                    event.getReactionEmote().getEmoji().equals(Emoji.NO_ENTRY.unicode)) {
                 input.cancelled = true;
                 inputWaiting.remove(input);
                 synchronized (input) {

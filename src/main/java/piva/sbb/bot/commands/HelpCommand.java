@@ -91,7 +91,7 @@ public class HelpCommand implements CommandExecutable {
                             .append("**")
                             .append(CommandHandler.prefix)
                             .append(command.command.name())
-                            .append(" ")
+                            .append(s.isEmpty() ? "" : " ")
                             .append(s)
                             .append("**:\n");
                     commandUseMode = false;

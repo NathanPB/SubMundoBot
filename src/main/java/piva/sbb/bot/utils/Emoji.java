@@ -1,9 +1,10 @@
 package piva.sbb.bot.utils;
 
-public enum Emojis {
+public enum Emoji {
+    ASTERISK("*️⃣"),
     NO_ENTRY("⛔");
 
-    Emojis(String unicode) {
+    Emoji(String unicode) {
         this.unicode = unicode;
     }
 
