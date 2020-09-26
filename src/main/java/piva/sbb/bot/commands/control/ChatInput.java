@@ -22,7 +22,7 @@ public class ChatInput extends ListenerAdapter {
 
         synchronized (input) {
             try {
-                input.wait(120000);
+                input.wait(60000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

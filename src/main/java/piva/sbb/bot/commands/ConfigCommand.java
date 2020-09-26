@@ -37,13 +37,15 @@ public class ConfigCommand implements CommandExecutable {
             embedBuilder.setDescription("Selecione o que deseja configurar");
 
             embedBuilder.addField(":asterisk: Prefixo", "", true);
+            embedBuilder.addField(":octagonal_sign: Canais proibidos", "", true);
+            embedBuilder.addField(":white_check_mark: Terminar", "", true);
 
             return embedBuilder.build();
         }
 
         @Override
         protected Emoji[] reactEmojis() {
-            return new Emoji[]{Emoji.ASTERISK};
+            return new Emoji[]{Emoji.ASTERISK, Emoji.OCTAGONAL_SIGN, Emoji.WHITE_CHECK_MARK};
         }
 
         @Override
@@ -69,7 +71,8 @@ public class ConfigCommand implements CommandExecutable {
                 channel.sendMessage(":white_check_mark: Prefixo do Bot definido para ``" + input.response.getContentDisplay() + "``").queue();
 
                 this.setup();
-            }
+            } else if (unicode.equals(Emoji.WHITE_CHECK_MARK.unicode))
+                this.finish();
         }
     }
 }

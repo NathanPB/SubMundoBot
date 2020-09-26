@@ -1,5 +1,6 @@
 package piva.sbb.bot.interfaces;
 
+import me.piva.utils.task.PyvaTask;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -22,6 +23,8 @@ public abstract class Interface extends ListenerAdapter {
     private InterfaceID id;
     protected Message message;
     boolean asyncReactEvent;
+
+    PyvaTask task;
 
     public Interface(Member member, TextChannel channel, LocalDateTime time, InterfaceID id, boolean asyncReactEvent) {
         this.member = member;
@@ -55,6 +58,10 @@ public abstract class Interface extends ListenerAdapter {
         if (addNew)
             interfaces.add(this);
 
+        task = PyvaTask.builder().delay(60000).runnable(task -> {
+            this.finish();
+        }).buildAndStart();
+
         try {
             for (Emoji emoji : reactEmojis()) {
                 message.addReaction(emoji.unicode).queue();
@@ -71,6 +78,11 @@ public abstract class Interface extends ListenerAdapter {
 
     public void remove() {
         interfaces.remove(this);
+    }
+
+    public void finish() {
+        delete();
+        remove();
     }
 
     public enum InterfaceID {

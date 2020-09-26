@@ -13,6 +13,8 @@ public class InterfaceHandler extends ListenerAdapter {
             if (anInterface.message.getIdLong() == event.getMessageIdLong() &&
                     anInterface.member.getIdLong() == event.getUserIdLong() &&
                     anInterface.channel.getIdLong() == event.getChannel().getIdLong()) {
+                anInterface.task.cancel();
+
                 if (!anInterface.asyncReactEvent) {
                     anInterface.reactEvent(event.getReaction().getReactionEmote().getEmoji());
                     return;
