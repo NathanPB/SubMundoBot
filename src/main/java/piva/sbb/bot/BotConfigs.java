@@ -1,8 +1,10 @@
 package piva.sbb.bot;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.util.ArrayList;
 
 public class BotConfigs {
     public static JSONObject json;
@@ -49,6 +51,7 @@ public class BotConfigs {
     private static void loadDefaults() {
         setDefault(json, "prefix", "*");
         setDefault(json, "permissions", new JSONObject());
+        setDefault(json, "prohibited channels", new JSONArray(new ArrayList<>()));
     }
 
     private static void setDefault(JSONObject jsonObject, String key, Object value) {

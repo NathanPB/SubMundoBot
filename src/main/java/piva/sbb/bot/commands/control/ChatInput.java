@@ -37,7 +37,7 @@ public class ChatInput extends ListenerAdapter {
     }
 
     public static Input ask(Member member, TextChannel channel, String message) {
-        Message reactMessage = channel.sendMessage(":pen_ballpoint: Digite " + message + "\n\nCancele esta operação reagindo com " + Emoji.NO_ENTRY.unicode + " nesta mensagem").complete();
+        Message reactMessage = channel.sendMessage(":pen_ballpoint: " + message + "\n\nCancele esta operação reagindo com " + Emoji.NO_ENTRY.unicode + " nesta mensagem").complete();
         reactMessage.addReaction(Emoji.NO_ENTRY.unicode).queue();
 
         Input input = ask(member.getIdLong(), channel.getIdLong(), reactMessage.getIdLong());

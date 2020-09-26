@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 public class CommandHandler extends ListenerAdapter {
     public static String prefix;
     public static List<SBBCommand> commands = new ArrayList<>();
+    public static List<Long> prohibitedChannels = new ArrayList<>();
 
     public static void register(CommandExecutable command) {
         Command commandAnnotation = command.getClass().getAnnotation(Command.class);
@@ -36,6 +37,11 @@ public class CommandHandler extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
         if (event.getMessage().getContentDisplay().toLowerCase().startsWith(prefix)) {
+            for (Long prohibitedChannel : prohibitedChannels) {
+                if (event.getChannel().getIdLong() == prohibitedChannel)
+                    return;
+            }
+
             String[] split = event.getMessage().getContentDisplay().toLowerCase().replaceFirst(Pattern.quote(prefix), "").trim().split(" ");
             String[] args = new String[split.length - 1];
 

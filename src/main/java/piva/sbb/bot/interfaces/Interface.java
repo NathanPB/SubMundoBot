@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import piva.sbb.bot.commands.control.ChatInput;
 import piva.sbb.bot.utils.Emoji;
 import piva.sbb.bot.utils.Misc;
 
@@ -20,17 +21,15 @@ public abstract class Interface extends ListenerAdapter {
     protected Member member;
     protected TextChannel channel;
     protected LocalDateTime time;
-    private InterfaceID id;
     protected Message message;
     boolean asyncReactEvent;
 
     PyvaTask task;
 
-    public Interface(Member member, TextChannel channel, LocalDateTime time, InterfaceID id, boolean asyncReactEvent) {
+    public Interface(Member member, TextChannel channel, LocalDateTime time, boolean asyncReactEvent) {
         this.member = member;
         this.channel = channel;
         this.time = time;
-        this.id = id;
         this.asyncReactEvent = asyncReactEvent;
     }
 
@@ -47,9 +46,8 @@ public abstract class Interface extends ListenerAdapter {
                 break;
             }
 
-            if (anInterface.member.getIdLong() == this.member.getIdLong() && anInterface.id == this.id) {
-                anInterface.delete();
-                interfaces.remove(anInterface);
+            if (anInterface.member.getIdLong() == this.member.getIdLong() && anInterface.channel.getIdLong() == this.channel.getIdLong()) {
+                anInterface.finish();
                 break;
             }
         }
@@ -65,7 +63,7 @@ public abstract class Interface extends ListenerAdapter {
         try {
             for (Emoji emoji : reactEmojis()) {
                 message.addReaction(emoji.unicode).queue();
-                Thread.sleep(100);
+                Thread.sleep(80);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -81,11 +79,20 @@ public abstract class Interface extends ListenerAdapter {
     }
 
     public void finish() {
-        delete();
         remove();
+        delete();
     }
 
-    public enum InterfaceID {
-        CONFIG_INTERFACE
+    protected boolean reactToAsk(ChatInput.Input input) {
+        if (input.timeout || input.cancelled) {
+            if (input.timeout) {
+                this.remove();
+                return true;
+            }
+
+            this.setup();
+            return true;
+        }
+        return false;
     }
 }

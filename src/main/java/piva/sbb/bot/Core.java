@@ -69,6 +69,10 @@ public class Core {
         logger.info("Configs loaded");
 
         CommandHandler.prefix = BotConfigs.json.getString("prefix");
+        for (Object prohibited_channels : BotConfigs.json.getJSONArray("prohibited channels")) {
+            if (prohibited_channels instanceof Long)
+                CommandHandler.prohibitedChannels.add((Long) prohibited_channels);
+        }
 
         logger.info("Loading commands...");
 
