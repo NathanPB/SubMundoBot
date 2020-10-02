@@ -15,6 +15,9 @@ public class BotProperties implements PropertiesFile {
     }
 
     @Property
+    public String botToken;
+
+    @Property
     @Default.DefaultString(defaultString = "localhost")
     public String dbHost;
 
