@@ -26,12 +26,21 @@ public class Core {
     public static void start() {
         logger = LoggerFactory.getLogger("Bot");
 
+        logger.info("Loading properties...");
+
+        properties = new PropertiesLoader<BotProperties>().load(BotProperties.class);
+
+        logger.info("Properties loaded");
+
         logger.info("Building bot...");
 
-        //BETA NzQ2MDg2ODg1NTc0NzA1MjA0.Xz7Njw.8sAV3PSOLr5QzAB0RzUjH08HY84
-        //NORMAL NzQ2MTE4MzA4NDMyMTgzMzI4.Xz7q0g.eRzrLxW5TDZZuw3He_gcVqXkL9M
+        if (properties.botToken.isEmpty()) {
+            logger.error("Bot Token in properties can't be empty!");
+            return;
+        }
+
         try {
-            jda = JDABuilder.createDefault("NzQ2MDg2ODg1NTc0NzA1MjA0.Xz7Njw.8sAV3PSOLr5QzAB0RzUjH08HY84")
+            jda = JDABuilder.createDefault(properties.botToken)
                     .setAutoReconnect(true)
                     .addEventListeners(new CommandHandler())
                     .addEventListeners(new ChatInput())
@@ -42,12 +51,6 @@ public class Core {
             e.printStackTrace();
             return;
         }
-
-        logger.info("Loading properties...");
-
-        properties = new PropertiesLoader<BotProperties>().load(BotProperties.class);
-
-        logger.info("Properties loaded");
 
         logger.info("Connecting to Database...");
 
