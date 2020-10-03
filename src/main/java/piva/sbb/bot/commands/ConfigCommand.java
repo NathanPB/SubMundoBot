@@ -1,17 +1,16 @@
 package piva.sbb.bot.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.*;
 import org.json.JSONArray;
 import piva.sbb.bot.BotConfigs;
 import piva.sbb.bot.Core;
+import piva.sbb.bot.board.Boards;
 import piva.sbb.bot.commands.control.*;
 import piva.sbb.bot.interfaces.EmojiReact;
 import piva.sbb.bot.utils.Emoji;
 import piva.sbb.bot.interfaces.Interface;
+import piva.sbb.bot.utils.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -45,13 +44,14 @@ public class ConfigCommand implements CommandExecutable {
             embedBuilder.addField(":octagonal_sign: Canais proibidos", "", true);
             embedBuilder.addField(":scales: Permissões", "", true);
             embedBuilder.addField(":white_check_mark: Terminar", "", true);
+            embedBuilder.addField(":star: Boards", "", true);
 
             return embedBuilder.build();
         }
 
         @Override
         protected Emoji[] reactEmojis() {
-            return new Emoji[]{Emoji.ASTERISK, Emoji.OCTAGONAL_SIGN, Emoji.SCALES, Emoji.WHITE_CHECK_MARK};
+            return new Emoji[]{Emoji.ASTERISK, Emoji.OCTAGONAL_SIGN, Emoji.SCALES, Emoji.WHITE_CHECK_MARK, Emoji.STAR};
         }
 
         @Override
@@ -74,6 +74,8 @@ public class ConfigCommand implements CommandExecutable {
                 new ConfigPermissionsInterface(member, channel, time).setup();
             else if (emojiReact.unicode.equals(Emoji.OCTAGONAL_SIGN.id))
                 new ConfigChannelsInterface(member, channel, time).setup();
+            else if (emojiReact.unicode.equals(Emoji.STAR.id))
+                new BoardConfigInterface(member, channel, time).setup();
             else if (emojiReact.unicode.equals(Emoji.WHITE_CHECK_MARK.id))
                 this.finish();
         }
@@ -221,6 +223,87 @@ public class ConfigCommand implements CommandExecutable {
             }
             else if (emojiReact.unicode.equals(Emoji.ARROW_LEFT.id)) {
                 new ConfigInterface(member, channel, time).setup();
+            } else if (emojiReact.unicode.equals(Emoji.WHITE_CHECK_MARK.id)) {
+                this.finish();
+            }
+        }
+    }
+
+    static class BoardConfigInterface extends Interface {
+
+        private static class Delete extends Interface {
+            public Delete(Member member, TextChannel channel, LocalDateTime time) {
+                super(member, channel, time, true);
+            }
+
+            @Override
+            protected MessageEmbed build(EmbedBuilder eb) {
+                eb.setTitle("Work In Progress");
+                return eb.build();
+            }
+
+            @Override
+            protected Emoji[] reactEmojis() {
+                return new Emoji[0];
+            }
+        }
+
+        private static class Create extends Interface {
+            public Create(Member member, TextChannel channel, LocalDateTime time) {
+                super(member, channel, time, true);
+            }
+
+            @Override
+            protected MessageEmbed build(EmbedBuilder eb) {
+                eb.setTitle("Work In Progress");
+                return eb.build();
+            }
+
+            @Override
+            protected Emoji[] reactEmojis() {
+                return new Emoji[0];
+            }
+        }
+
+
+        public BoardConfigInterface(Member member, TextChannel channel, LocalDateTime time) {
+            super(member, channel, time, true);
+        }
+
+        @Override
+        protected MessageEmbed build(EmbedBuilder eb) {
+            eb.setTitle("Configuração das Boards");
+
+            String boards = Boards.boards.stream()
+                .map(board -> {
+                    boolean isCustomEmoji = StringUtils.isLongNumeric(board.emoji);
+
+                    String emojiString = isCustomEmoji
+                        ? Core.getJDA().getEmoteById(board.emoji).getAsMention()
+                        : board.emoji;
+
+                    return board.emojiCount  + " " + emojiString + " em " + board.channel.getAsMention();
+                }).collect(Collectors.joining(", "));
+
+            eb.setDescription("Boards existentes: " + boards);
+
+            eb.addField(":heavy_plus_sign: Adicionar", "", true);
+            eb.addField(":heavy_minus_sign:  Remover", "", true);
+            eb.addField(":white_check_mark: Pronto", "", false);
+            return eb.build();
+        }
+
+        @Override
+        protected Emoji[] reactEmojis() {
+            return new Emoji[]{ Emoji.HEAVY_PLUS_SIGN, Emoji.HEAVY_MINUS_SIGN, Emoji.WHITE_CHECK_MARK };
+        }
+
+        @Override
+        protected void reactEvent(EmojiReact emojiReact) {
+            if (emojiReact.unicode.equals(Emoji.HEAVY_PLUS_SIGN.id)) {
+                new Create(member, channel, time).setup();
+            } else if (emojiReact.unicode.equals(Emoji.HEAVY_MINUS_SIGN.id)) {
+                new Delete(member, channel, time).setup();
             } else if (emojiReact.unicode.equals(Emoji.WHITE_CHECK_MARK.id)) {
                 this.finish();
             }

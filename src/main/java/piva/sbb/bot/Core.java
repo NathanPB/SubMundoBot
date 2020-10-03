@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import piva.sbb.bot.board.Boards;
 import piva.sbb.bot.commands.ConfigCommand;
 import piva.sbb.bot.commands.HelpCommand;
 import piva.sbb.bot.commands.MilkCommand;
@@ -96,6 +97,9 @@ public class Core {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        logger.info("Loading boards");
+        Boards.load();
 
         guild = jda.getGuildById(BotConfigs.json.getLong("guild"));
     }

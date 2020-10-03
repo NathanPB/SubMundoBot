@@ -56,6 +56,14 @@ public class BotConfigs {
         setDefault(permissions, "admin", 0L);
         setDefault(json, "permissions", permissions);
         setDefault(json, "prohibited channels", new JSONArray(new ArrayList<>()));
+
+        JSONArray boards = new JSONArray();
+        JSONObject board = new JSONObject();
+        board.put("channel", 0);
+        board.put("emoji", "⭐");
+        board.put("count", 3);
+        boards.put(board);
+        setDefault(json, "boards", boards);
     }
 
     private static void setDefault(JSONObject jsonObject, String key, Object value) {
